@@ -150,7 +150,7 @@ function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 
         if (keyChunk[0] !== TemplateChunkType.Text) throw new Error()
         const key = (keyChunk[1] as string).trim()
-        keys = [...keys, key as string]
+        keys.push(key)
 
         const innerPath = currentPath.concat()
         innerPath.push(key)
@@ -233,18 +233,11 @@ function isTokenOfArray(token) {
 }
 
 function isTokenOfString(token) {
-    return !!token.match(/('|")+/)
+    return /('|")+/.test(token)
 }
 
 function isTokenOfNumber(token) {
-    return !!token.match(/\s*[0-9]+\s*/)
-}
-
-function suckSpaces(template: TemplateChunk[]) {
-    let type, token
-    while (([[type, token]] = template, type === TemplateChunkType.Text && isNoToken(token))) {
-        template.splice(0, 1)
-    }
+    return /[0-9]+/.test(token.trim())
 }
 
 function isNoToken(token) {
@@ -252,5 +245,12 @@ function isNoToken(token) {
 }
 
 function isTokenOfOutput(token) {
-    return !!token.trim().match(/^[a-zA-Z]+$/)
+    return /^[a-zA-Z]+$/.test(token.trim())
+}
+
+function suckSpaces(template: TemplateChunk[]) {
+    let type, token
+    while (([[type, token]] = template, type === TemplateChunkType.Text && isNoToken(token))) {
+        template.splice(0, 1)
+    }
 }
