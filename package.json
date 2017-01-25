@@ -11,7 +11,7 @@
   "scripts": {
     "start": "NODE_ENV=testing jest",
     "build": "rm -rf ./dist/*.js; rm -rf ./dist/*.js.map; NODE_ENV=production webpack -p; npm run declarations",
-    "perf": "NODE_ENV=performance webpack && node perf.js && rm -rf ./performance",
+    "perf": "NODE_ENV=performance webpack && node perf.js",
     "declarations": "rm -rf ./dist/*.d.ts; tsc --declaration --declarationDir ./dist --outDir ./tsc_tmp_output; rm -rf ./dist/*.spec.d.ts; rm -rf ./tsc_tmp_output",
     "preversion": "npm run test && npm run build",
     "test": "tsc --noEmit && $(npm bin)/tslint --project ./tsconfig.json --config ./tslint.json --format stylish && jest --no-cache --runInBand",

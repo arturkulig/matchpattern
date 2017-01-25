@@ -5,3 +5,4 @@ typings
 npm-debug.log
 tests/coverage
 dist
+performance
