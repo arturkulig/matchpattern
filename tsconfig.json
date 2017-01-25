@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "ES2015",
+        "types": ["node", "jasmine"],
+        "module": "commonjs",
+        "lib": [
+            "dom",
+            "es6",
+            "dom.iterable",
+            "es2015.promise"
+        ],
+        "experimentalDecorators": true,
+        "alwaysStrict": true,
+        "inlineSourceMap": true,
+        "inlineSources": true
+    }
+}

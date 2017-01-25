@@ -1,0 +1,52 @@
+{
+  "name": "match-pattern",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./dist/match.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arturkulig/match"
+  },
+  "scripts": {
+    "start": "NODE_ENV=testing jest",
+    "build": "rm -rf ./dist/*.js; rm -rf ./dist/*.js.map; NODE_ENV=production webpack -p; npm run declarations",
+    "declarations": "rm -rf ./dist/*.d.ts; tsc --declaration --declarationDir ./dist --outDir ./tsc_tmp_output; rm -rf ./dist/*.spec.d.ts; rm -rf ./tsc_tmp_output",
+    "preversion": "npm run test && npm run build",
+    "test": "tsc --noEmit && $(npm bin)/tslint --project ./tsconfig.json --config ./tslint.json --format stylish && jest",
+    "debug": "node --inspect --debug-brk ./node_modules/.bin/jest -i"
+  },
+  "author": "Artur Kulig",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jasmine": "^2.5.40",
+    "@types/node": "^6.0.60",
+    "jest": "^18.0.0",
+    "ts-loader": "^1.3.3",
+    "tslint": "^4.2.0",
+    "typescript": "^2.1.4",
+    "webpack": "^1.14.0"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "jest": {
+    "verbose": true,
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "testPathDirs": [
+      "<rootDir>/src"
+    ],
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      ".*\\.tsx?$": "<rootDir>/jest-ts-preprocessor.js"
+    }
+  },
+  "dependencies": {
+    "lodash.isequal": "^4.5.0"
+  }
+}
