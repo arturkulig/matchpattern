@@ -13,7 +13,7 @@
     "build": "rm -rf ./dist/*.js; rm -rf ./dist/*.js.map; NODE_ENV=production webpack -p; npm run declarations",
     "declarations": "rm -rf ./dist/*.d.ts; tsc --declaration --declarationDir ./dist --outDir ./tsc_tmp_output; rm -rf ./dist/*.spec.d.ts; rm -rf ./tsc_tmp_output",
     "preversion": "npm run test && npm run build",
-    "test": "tsc --noEmit && $(npm bin)/tslint --project ./tsconfig.json --config ./tslint.json --format stylish && jest --no-cache",
+    "test": "tsc --noEmit && $(npm bin)/tslint --project ./tsconfig.json --config ./tslint.json --format stylish && jest --no-cache --runInBand",
     "debug": "node --inspect --debug-brk ./node_modules/.bin/jest -i"
   },
   "author": "Artur Kulig",
