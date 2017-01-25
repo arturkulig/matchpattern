@@ -83,7 +83,7 @@ export function getMatcher(template: TemplateChunk[], currentPath: Path = []): P
 }
 
 function getOutputMatchers(template: TemplateChunk[], currentPath: Path): ParserOutput {
-    let remainingTemplate = template.concat([])
+    let remainingTemplate = template.concat()
     const [outputChunk] = remainingTemplate.splice(0, 1) as TemplateTextChunk[]
     const key = outputChunk[1].trim()
     return {
@@ -99,7 +99,7 @@ function getOutputMatchers(template: TemplateChunk[], currentPath: Path): Parser
 }
 
 function getRefMatchers(template: TemplateChunk[], currentPath: Path): ParserOutput {
-    let remainingTemplate = template.concat([])
+    let remainingTemplate = template.concat()
     const [refChunk] = remainingTemplate.splice(0, 1) as TemplateRefChunk[]
     return {
         matchers: [[
@@ -111,7 +111,7 @@ function getRefMatchers(template: TemplateChunk[], currentPath: Path): ParserOut
 }
 
 function getObjectMatchers(template: TemplateChunk[], currentPath: Path): ParserOutput {
-    let remainingTemplate = template.concat([])
+    let remainingTemplate = template.concat()
     const [bracketChunk] = remainingTemplate.splice(0, 1)
 
     let matchers: PathMatcher[] = [[currentPath, value => (typeof value === 'object' && value !== null)]]
@@ -163,7 +163,7 @@ function getObjectMatchers(template: TemplateChunk[], currentPath: Path): Parser
 }
 
 function getArrayMatchers(template: TemplateChunk[], currentPath: Path): ParserOutput {
-    let remainingTemplate = template.concat([])
+    let remainingTemplate = template.concat()
     const [bracketChunk] = remainingTemplate.splice(0, 1)
 
     let matchers: PathMatcher[] = [[currentPath, value => (typeof value === 'object' && value instanceof Array)]]
@@ -193,7 +193,7 @@ function getArrayMatchers(template: TemplateChunk[], currentPath: Path): ParserO
 }
 
 function getStringMatchers(template: TemplateChunk[], currentPath: Path): ParserOutput {
-    let remainingTemplate = template.concat([])
+    let remainingTemplate = template.concat()
     const [quoteChunk] = remainingTemplate.splice(0, 1) as TemplateTextChunk[]
     let text = ''
 
@@ -215,7 +215,7 @@ function getStringMatchers(template: TemplateChunk[], currentPath: Path): Parser
 }
 
 function getNumberMatchers(template: TemplateChunk[], currentPath: Path): ParserOutput {
-    let remainingTemplate = template.concat([])
+    let remainingTemplate = template.concat()
     const [numberChunk] = remainingTemplate.splice(0, 1) as TemplateTextChunk[]
     const num = parseFloat(numberChunk[1])
     return {
@@ -228,7 +228,7 @@ function getNumberMatchers(template: TemplateChunk[], currentPath: Path): Parser
 }
 
 function getAnyMatchers(template: TemplateChunk[], currentPath: Path): ParserOutput {
-    let remainingTemplate = template.concat([])
+    let remainingTemplate = template.concat()
     const [soapChunk] = remainingTemplate.splice(0, 1) as TemplateTextChunk[]
     return {
         matchers: [[
