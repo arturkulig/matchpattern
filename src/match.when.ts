@@ -15,6 +15,7 @@ export function match<T>(valueToMatch, matchers: Matcher<T>[] = []): T {
         }
         return result
     }
+    throw new Error(`${valueToMatch} is unmatched`)
 }
 
 export type WhenResult<T> = (result: Result<T>) => Matcher<T>

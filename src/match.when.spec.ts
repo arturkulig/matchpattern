@@ -1,6 +1,14 @@
 import { match, when } from './match.when'
 
 describe('match when', () => {
+    it('throws when no maching case', () => {
+        expect(() => {
+            match(3, [
+                when`2`(() => 2),
+                when`1`(() => 1),
+            ])
+        }).toThrow()
+    })
     it('return with function', () => {
         expect(match(1, [
             when`{a: 1}`(() => 'wow!'),
