@@ -14,7 +14,7 @@ export type ParserOutput = { matchers: PathMatcher[], template: TemplateChunk[] 
 
 export function compare(value: any, template: TemplateStringsArray, refs: any[]) {
     const output = {}
-    const { matchers } = getMatcher(sliceTemplate(template))
+    const { matchers } = getCachedMatcher(template)
     for (let i = 0; i < matchers.length; i++) {
         const [path, matcher] = matchers[i]
         if (!matcher(getDeep(value, path), refs, output)) {
@@ -30,6 +30,24 @@ function getDeep(value: any, path: Path) {
     if (value === null) return
     const [key, ...rest] = path
     return getDeep(value[key], rest)
+}
+
+const cache: [TemplateStringsArray, PathMatcher[]][] = []
+export function getCachedMatcher(template: TemplateStringsArray): ParserOutput {
+    cacheLoop:
+    for (let cacheIdx = 0; cacheIdx < cache.length; cacheIdx++) {
+        for (let partIdx = 0; partIdx < Math.max(cache[cacheIdx].length, cache[cacheIdx][0].length); partIdx++) {
+            if (cache[cacheIdx][0][partIdx] !== template[partIdx]) continue cacheLoop
+        }
+        return { matchers: cache[cacheIdx][1], template: [] }
+    }
+    const freshParserOutput = getTemplateMatcher(template)
+    cache.push([template, freshParserOutput.matchers])
+    return freshParserOutput
+}
+
+export function getTemplateMatcher(template: TemplateStringsArray) {
+    return getMatcher(sliceTemplate(template))
 }
 
 export function getMatcher(template: TemplateChunk[], currentPath: Path = []): ParserOutput {
