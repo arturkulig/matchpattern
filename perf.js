@@ -12,11 +12,11 @@ for (let i = 0; i < repeat; i++) {
     match({ a: { b: { c: 42 } } }, [
         when`1`(noop),
         when`{a: [42, 24]}`(noop),
-        when`{a:{b:{c: discovery}}}`(noop),
+        when`{a: {b: {c: discovery}}}`(noop),
         when`_`(noop)
     ])
     match([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], [
-        when`[1, "2", 3, ${Math.random()}, 5, 6, 7, 8, 9]`(noop),
+        when`[1, "2", 3, {a: ${Math.random()}}, _, 6, 7, 8, 9]`(noop),
         when`_`(noop)
     ])
     const [sec, nsec] = process.hrtime(t1)

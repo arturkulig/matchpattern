@@ -24,10 +24,13 @@ export function compare(value: any, template: TemplateStringsArray, refs: any[])
 }
 
 function getDeep(value: any, path: Path) {
-    if (path.length === 0) return value
-    if (value === undefined) return
-    if (value === null) return
-    return getDeep(value[path[0]], path.slice(1))
+    let diggedValue = value
+    for (let i = 0; i < path.length; i++) {
+        if (diggedValue === undefined) return
+        if (diggedValue === null) return
+        diggedValue = diggedValue[path[i]]
+    }
+    return diggedValue
 }
 
 export const cache: [TemplateStringsArray, PathMatcher[]][] = []
@@ -59,7 +62,7 @@ export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], c
             return
         }
         case (isNoToken(token)): {
-            template.splice(0, 1)
+            template.shift()
             getMatcher(template, matchers, currentPath)
             return
         }
@@ -92,9 +95,9 @@ export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], c
 }
 
 function getOutputMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
-    const [outputChunk] = template.splice(0, 1) as TemplateTextChunk[]
+    const outputChunk = template.shift() as TemplateTextChunk
     const key = outputChunk[1].trim()
-    matchers.push([
+    matchers.splice(matchers.length, 0, [
         currentPath,
         (value, refs, output) => {
             output[key] = value
@@ -104,17 +107,17 @@ function getOutputMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 }
 
 function getRefMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
-    const [refChunk] = template.splice(0, 1) as TemplateRefChunk[]
-    matchers.push([
+    const refChunk = template.shift()
+    matchers.splice(matchers.length, 0, [
         currentPath,
         (value, refs) => value === refs[refChunk[1]]
     ])
 }
 
 function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
-    template.splice(0, 1) // pop bracket
+    template.shift() // pop bracket
 
-    matchers.push([currentPath, value => (typeof value === 'object' && value !== null)])
+    matchers.splice(matchers.length, 0, [currentPath, value => (typeof value === 'object' && value !== null)])
     let keys: string[] = []
 
     while (true) {
@@ -125,27 +128,27 @@ function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
         }
 
         if (template[0][1] === '}') {
-            matchers.push([
+            matchers.splice(matchers.length, 0, [
                 currentPath,
                 (value) => (
                     Object.keys(value).length === keys.length &&
                     Object.keys(value).reduce((result, key, i) => result && (keys.indexOf(key) >= 0), true)
                 )
             ])
-            template.splice(0, 1)
+            template.shift()
             return
         }
 
         if (template[0][1] === ',') {
-            template.splice(0, 1)
+            template.shift()
             continue
         }
 
         suckSpaces(template)
-        const [keyChunk] = template.splice(0, 1)
+        const keyChunk = template.shift()
 
         suckSpaces(template)
-        const [colon] = template.splice(0, 1)
+        const colon = template.shift()
         if (colon[1] !== ':') throw new Error()
 
         if (keyChunk[0] !== TemplateChunkType.Text) throw new Error()
@@ -159,25 +162,25 @@ function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 }
 
 function getArrayMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
-    template.splice(0, 1) // pop bracket
+    template.shift() // pop bracket
 
-    matchers.push([currentPath, value => (typeof value === 'object' && value instanceof Array)])
+    matchers.splice(matchers.length, 0, [currentPath, value => (typeof value === 'object' && value instanceof Array)])
     let length = 0
 
     while (true) {
         suckSpaces(template)
 
         if (template[0][0] === TemplateChunkType.Text && template[0][1] === ']') {
-            matchers.push([
+            matchers.splice(matchers.length, 0, [
                 currentPath,
                 (value) => value.length === length
             ])
-            template.splice(0, 1)
+            template.shift()
             return matchers
         }
 
         if (template[0][1] === ',') {
-            template.splice(0, 1)
+            template.shift()
             continue
         }
 
@@ -186,42 +189,42 @@ function getArrayMatchers(template: TemplateChunk[], matchers: PathMatcher[], cu
 }
 
 function getStringMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
-    const [quoteChunk] = template.splice(0, 1) as TemplateTextChunk[]
+    const quoteChunk = template.shift() as TemplateTextChunk
     let text = ''
 
     while (true) {
         if (template[0][0] === TemplateChunkType.Ref) throw new Error()
         if (template[0][1] === quoteChunk[1]) {
-            template.splice(0, 1)
-            matchers.push([
+            template.shift()
+            matchers.splice(matchers.length, 0, [
                 currentPath,
                 (value) => value === text
             ])
             return
         }
-        text += template.splice(0, 1)[0][1]
+        text += template.shift()[1]
     }
 }
 
 function getNumberMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
-    const [numberChunk] = template.splice(0, 1) as TemplateTextChunk[]
+    const numberChunk = template.shift() as TemplateTextChunk
     const num = parseFloat(numberChunk[1])
-    matchers.push([
+    matchers.splice(matchers.length, 0, [
         currentPath,
         value => value === num
     ])
 }
 
 function getAnyMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
-    const [soapChunk] = template.splice(0, 1) as TemplateTextChunk[]
-    matchers.push([
+    const soapChunk = template.shift() as TemplateTextChunk
+    matchers.splice(matchers.length, 0, [
         currentPath,
         () => true
     ])
 }
 
 function isTokenOfAny(token) {
-    return token.trim() === '_'
+    return /^\s*_\s*$/.test(token)
 }
 
 function isTokenOfObject(token) {
@@ -237,7 +240,7 @@ function isTokenOfString(token) {
 }
 
 function isTokenOfNumber(token) {
-    return /[0-9]+/.test(token.trim())
+    return /^\s*[0-9]+\s*$/.test(token)
 }
 
 function isNoToken(token) {
@@ -245,12 +248,12 @@ function isNoToken(token) {
 }
 
 function isTokenOfOutput(token) {
-    return /^[a-zA-Z]+$/.test(token.trim())
+    return /^\s*[a-zA-Z0-9_]+\s*$/.test(token)
 }
 
 function suckSpaces(template: TemplateChunk[]) {
     let type, token
     while (([[type, token]] = template, type === TemplateChunkType.Text && isNoToken(token))) {
-        template.splice(0, 1)
+        template.shift()
     }
 }
