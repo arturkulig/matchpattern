@@ -16,16 +16,17 @@ for (let i = 0; i < repeat; i++) {
         when`_`(noop)
     ])
     match([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], [
-        when`[1, 2, 3, ${Math.random()}, 5, 6, 7, 8, 9]`(noop),
+        when`[1, "2", 3, ${Math.random()}, 5, 6, 7, 8, 9]`(noop),
         when`_`(noop)
     ])
     const [sec, nsec] = process.hrtime(t1)
     times.push((sec * 1e9 + nsec) / 3)
 }
 
+const nanoToMili = v => v / 1e3
 const min = times.reduce((min, time) => Math.min(min, time), Number.MAX_VALUE)
 const timesSorted = times.concat([]).sort((a, b) => Math.sign(a - b))
-const formatTime = v => `${Math.round(v / 1e3 * 1e2) / 1e2} µs`
+const formatTime = v => `${Math.round(nanoToMili(v) * 1e3) / 1e3} µs`
 function summarize(label, times) {
     console.log('')
     console.log(label)
@@ -39,8 +40,8 @@ function summarize(label, times) {
             }%`)
     console.log(`${resolution}/${resolution} ${formatTime(times[times.length - 1])}\t${Math.round(100 * times[times.length - 1] / min)}%`)
 }
-summarize('timed', times)
-summarize('sorted', timesSorted)
+// summarize('timed', times)
+// summarize('sorted', timesSorted)
 
 console.log('')
 const uncached = times[0]
