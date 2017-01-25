@@ -5,13 +5,10 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const config = {
     entry: path.resolve(__dirname, 'src/match.when.ts'),
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, process.env.NODE_ENV === 'performance' ? 'performance' : 'dist'),
         filename: 'match.js',
         library: 'match',
         libraryTarget: 'umd',
-    },
-    externals: {
-        'lodash.isequal': 'lodash.isequal'
     },
     resolve: {
         extensions: ['.ts', '.js']
@@ -38,7 +35,7 @@ const config = {
 
 if (process.env.NODE_ENV === 'production') {
     config.plugins.push(new UglifyJSPlugin({
-        mangle: true,
+        mangle: false,
         comments: false,
         sourceMap: true,
         compress: true

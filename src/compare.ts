@@ -32,7 +32,8 @@ function getDeep(value: any, path: Path) {
     return getDeep(value[key], rest)
 }
 
-const cache: [TemplateStringsArray, PathMatcher[]][] = []
+export const cache: [TemplateStringsArray, PathMatcher[]][] = []
+
 export function getCachedMatcher(template: TemplateStringsArray): ParserOutput {
     cacheLoop:
     for (let cacheIdx = 0; cacheIdx < cache.length; cacheIdx++) {

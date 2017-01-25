@@ -1,5 +1,4 @@
 import { compare } from './compare'
-import * as isEqual from 'lodash.isequal'
 
 export type FunctionResult<T> = (output: { [id: string]: any }) => T
 export type Result<T> = T | FunctionResult<T>
@@ -19,25 +18,13 @@ export function match<T>(valueToMatch, matchers: Matcher<T>[] = []): T {
 }
 
 export type WhenResult<T> = (result: Result<T>) => Matcher<T>
-export function when<T>(template: TemplateStringsArray, ...refs: any[]): WhenResult<T>  {
-    if (template.length === 1 && refs.length === 0 && isJSON(template[0])) {
-        const pattern = JSON.parse(template[0])
-        return (result: Result<T>) => value => {
-            return isEqual(value, pattern) ? [{}, result] : ([null, null] as MatcherResult<T>)
-        }
-    }
+
+const jsonCache = {}
+const emptyMatcherResult = [null, null]
+export function when<T>(template: TemplateStringsArray, ...refs: any[]): WhenResult<T> {
     return (result: Result<T>) => value => {
         const output = compare(value, template, refs)
-        if (output === null) return ([null, null] as MatcherResult<T>)
+        if (output === null) return (emptyMatcherResult as MatcherResult<T>)
         return [output, result] as MatcherResult<T>
-    }
-}
-
-function isJSON(value) {
-    try {
-        JSON.parse(value)
-        return true
-    } catch (e) {
-        return false
     }
 }

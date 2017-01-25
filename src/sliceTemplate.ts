@@ -17,8 +17,9 @@ export function sliceTemplate(s: TemplateStringsArray) {
             chunks.push([TemplateChunkType.Ref, refCount++])
         }
         tokenize(s[i])
-            .map(part => ([TemplateChunkType.Text, part] as TemplateChunk))
-            .forEach(chunk => chunks.push(chunk))
+            .forEach(
+            part => chunks.push([TemplateChunkType.Text, part] as TemplateChunk)
+            )
     }
     return chunks
 }
