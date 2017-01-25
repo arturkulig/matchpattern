@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "ES2015",
+        "target": "ES5",
         "types": ["node", "jasmine"],
         "module": "commonjs",
         "lib": [
@@ -10,8 +10,6 @@
             "es2015.promise"
         ],
         "experimentalDecorators": true,
-        "alwaysStrict": true,
-        "inlineSourceMap": true,
-        "inlineSources": true
+        "alwaysStrict": true
     }
 }

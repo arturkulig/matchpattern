@@ -43,31 +43,3 @@ describe('match when', () => {
         ])).toBe(42)
     })
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-const a = {a: 1}
-match({ a: { b: { c: 42 } } }, [
-    when `{ a: { b: { c: 23 } } }` (() => { throw new Error() }),
-    when `{ a: { b: { c: ${a} } } }` (({dupa}) => dupa),
-    when `_` (() => { throw new Error() }),
-])
-*/
-
