@@ -33,6 +33,12 @@ describe('match', () => {
             expect(match`{a: {b : 'c'}}`({ a: { b: 'c' } })).not.toBe(null)
             expect(match`{a: {b : 'c'}}`({ a: 'a' })).toBe(null)
         })
+        it('spread', () => {
+            expect(match`{a : 1, b: 2, ...}`({ a: 1, b: 2, c: 3 })).not.toBe(null)
+            expect(match`{a : 1, b: 2, ...others}`({ a: 1, b: 2, c: 3 })).toEqual({ others: { c: 3 } })
+            expect(match`{a : 1, b: 2, ...}`({ a: 1 })).toBe(null)
+            expect(match`{a : 1, b: 2, ...}`({ b: 2 })).toBe(null)
+        })
     })
 
     describe('can match arrays', () => {
@@ -46,6 +52,11 @@ describe('match', () => {
             expect(match`[{a: 'a'}]`([{ a: 'a' }])).not.toBe(null)
             expect(match`[{a: 'a'}, 'zxc']`([{ a: 'a' }, 'zxc'])).not.toBe(null)
             expect(match`[{a: 'a'}]`([{ b: 'a' }])).toBe(null)
+        })
+        it('spread', () => {
+            expect(match`[1,2,3,...]`([1, 2, 3, 4, 5])).not.toBe(null)
+            expect(match`[1,2,3,...]`([1, 2])).toBe(null)
+            expect(match`[1,2,3,...others]`([1, 2, 3, 4, 5])).toEqual({ others: [4, 5] })
         })
     })
 

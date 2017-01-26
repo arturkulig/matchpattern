@@ -57,36 +57,36 @@ export function getTemplateMatcher(template: TemplateStringsArray): PathMatcher[
 export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     const [[type, token]] = template
     switch (true) {
-        case (type === TemplateChunkType.Ref): {
+        case (isTokenOfRef(template)): {
             getRefMatchers(template, matchers, currentPath)
             return
         }
-        case (isNoToken(token)): {
+        case (isNoToken(template)): {
             template.shift()
             getMatcher(template, matchers, currentPath)
             return
         }
-        case (isTokenOfObject(token)): {
+        case (isTokenOfObject(template)): {
             getObjectMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfArray(token)): {
+        case (isTokenOfArray(template)): {
             getArrayMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfString(token)): {
+        case (isTokenOfString(template)): {
             getStringMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfNumber(token)): {
+        case (isTokenOfNumber(template)): {
             getNumberMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfAny(token)): {
+        case (isTokenOfAny(template)): {
             getAnyMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfOutput(token)): {
+        case (isTokenOfOutput(template)): {
             getOutputMatchers(template, matchers, currentPath)
             return
         }
@@ -97,7 +97,7 @@ export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], c
 function getOutputMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     const outputChunk = template.shift() as TemplateTextChunk
     const key = outputChunk[1].trim()
-    matchers.splice(matchers.length, 0, [
+    matchers.push([
         currentPath,
         (value, refs, output) => {
             output[key] = value
@@ -108,7 +108,7 @@ function getOutputMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 
 function getRefMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     const refChunk = template.shift()
-    matchers.splice(matchers.length, 0, [
+    matchers.push([
         currentPath,
         (value, refs) => value === refs[refChunk[1]]
     ])
@@ -117,30 +117,58 @@ function getRefMatchers(template: TemplateChunk[], matchers: PathMatcher[], curr
 function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     template.shift() // pop bracket
 
-    matchers.splice(matchers.length, 0, [currentPath, value => (typeof value === 'object' && value !== null)])
+    matchers.push([currentPath, value => (typeof value === 'object' && value !== null)])
     let keys: string[] = []
 
     while (true) {
         suckSpaces(template)
 
-        if (template[0][0] === TemplateChunkType.Ref) {
+        if (isTokenOfRef(template)) {
             throw new Error()
         }
 
         if (template[0][1] === '}') {
-            matchers.splice(matchers.length, 0, [
+            matchers.push([
                 currentPath,
                 (value) => (
                     Object.keys(value).length === keys.length &&
                     Object.keys(value).reduce((result, key, i) => result && (keys.indexOf(key) >= 0), true)
                 )
             ])
-            template.shift()
+            template.shift() // pop closing bracket
             return
         }
 
         if (template[0][1] === ',') {
             template.shift()
+            suckSpaces(template)
+
+            if (isTokenOfNamedSpread(template)) {
+                const [, , , [, outputName]] = template.splice(0, 4) // pop tokens
+                matchers.push([
+                    currentPath,
+                    (value, refs, output) => {
+                        const namedOutput = {}
+                        for (let valueKey in value) {
+                            if (!Object.prototype.hasOwnProperty.call(value, valueKey)) continue
+                            if (keys.indexOf(valueKey) >= 0) continue
+                            namedOutput[valueKey] = value[valueKey]
+                        }
+                        output[outputName] = namedOutput
+                        return true
+                    }
+                ])
+                suckSpaces(template)
+                template.shift() // pop closing bracket
+                return
+            }
+
+            if (isTokenOfSpread(template)) {
+                template.splice(0, 3) // pop tokens
+                suckSpaces(template)
+                template.shift() // pop closing bracket
+                return
+            }
             continue
         }
 
@@ -164,23 +192,45 @@ function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 function getArrayMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     template.shift() // pop bracket
 
-    matchers.splice(matchers.length, 0, [currentPath, value => (typeof value === 'object' && value instanceof Array)])
+    matchers.push([currentPath, value => (typeof value === 'object' && value instanceof Array)])
     let length = 0
 
     while (true) {
         suckSpaces(template)
 
         if (template[0][0] === TemplateChunkType.Text && template[0][1] === ']') {
-            matchers.splice(matchers.length, 0, [
+            matchers.push([
                 currentPath,
                 (value) => value.length === length
             ])
-            template.shift()
+            template.shift() // pop closing bracket
             return matchers
         }
 
         if (template[0][1] === ',') {
             template.shift()
+            suckSpaces(template)
+
+            if (isTokenOfNamedSpread(template)) {
+                const [, , , [, outputName]] = template.splice(0, 4) // pop tokens
+                matchers.push([
+                    currentPath,
+                    (value, refs, output) => {
+                        output[outputName] = value.slice(length)
+                        return true
+                    }
+                ])
+                suckSpaces(template)
+                template.shift() // pop closing bracket
+                return
+            }
+
+            if (isTokenOfSpread(template)) {
+                template.splice(0, 3) // pop tokens
+                suckSpaces(template)
+                template.shift() // pop closing bracket
+                return
+            }
             continue
         }
 
@@ -196,7 +246,7 @@ function getStringMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
         if (template[0][0] === TemplateChunkType.Ref) throw new Error()
         if (template[0][1] === quoteChunk[1]) {
             template.shift()
-            matchers.splice(matchers.length, 0, [
+            matchers.push([
                 currentPath,
                 (value) => value === text
             ])
@@ -209,7 +259,7 @@ function getStringMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 function getNumberMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     const numberChunk = template.shift() as TemplateTextChunk
     const num = parseFloat(numberChunk[1])
-    matchers.splice(matchers.length, 0, [
+    matchers.push([
         currentPath,
         value => value === num
     ])
@@ -217,43 +267,61 @@ function getNumberMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 
 function getAnyMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     const soapChunk = template.shift() as TemplateTextChunk
-    matchers.splice(matchers.length, 0, [
+    matchers.push([
         currentPath,
         () => true
     ])
 }
 
-function isTokenOfAny(token) {
-    return /^\s*_\s*$/.test(token)
+function isTokenOfNamedSpread(template: TemplateChunk[]) {
+    return (
+        isTokenOfSpread(template) &&
+        isTokenOfOutput(template.slice(3, 4))
+    )
 }
 
-function isTokenOfObject(token) {
-    return token === '{'
+function isTokenOfSpread(template: TemplateChunk[]) {
+    return (
+        template[0][0] === TemplateChunkType.Text && template[0][1] === '.' &&
+        template[1][0] === TemplateChunkType.Text && template[1][1] === '.' &&
+        template[2][0] === TemplateChunkType.Text && template[2][1] === '.'
+    )
 }
 
-function isTokenOfArray(token) {
-    return token === '['
+function isTokenOfAny(template: TemplateChunk[]) {
+    return template[0][0] === TemplateChunkType.Text && /^\s*_\s*$/.test((template[0] as TemplateTextChunk)[1])
 }
 
-function isTokenOfString(token) {
-    return /('|")+/.test(token)
+function isTokenOfObject(template: TemplateChunk[]) {
+    return template[0][0] === TemplateChunkType.Text && (template[0] as TemplateTextChunk)[1] === '{'
 }
 
-function isTokenOfNumber(token) {
-    return /^\s*[0-9]+\s*$/.test(token)
+function isTokenOfArray(template: TemplateChunk[]) {
+    return template[0][0] === TemplateChunkType.Text && (template[0] as TemplateTextChunk)[1] === '['
 }
 
-function isNoToken(token) {
-    return token.trim() === ''
+function isTokenOfString(template: TemplateChunk[]) {
+    return template[0][0] === TemplateChunkType.Text && /('|")+/.test((template[0] as TemplateTextChunk)[1])
 }
 
-function isTokenOfOutput(token) {
-    return /^\s*[a-zA-Z0-9_]+\s*$/.test(token)
+function isTokenOfNumber(template: TemplateChunk[]) {
+    return template[0][0] === TemplateChunkType.Text && /^\s*[0-9]+\s*$/.test((template[0] as TemplateTextChunk)[1])
+}
+
+function isNoToken(template: TemplateChunk[]) {
+    return template[0][0] === TemplateChunkType.Text && (template[0] as TemplateTextChunk)[1].trim() === ''
+}
+
+function isTokenOfOutput(template: TemplateChunk[]) {
+    return template[0][0] === TemplateChunkType.Text && /^\s*[a-zA-Z0-9_]+\s*$/.test((template[0] as TemplateTextChunk)[1])
+}
+
+function isTokenOfRef(template: TemplateChunk[]) {
+    return template[0][0] === TemplateChunkType.Ref
 }
 
 function suckSpaces(template: TemplateChunk[]) {
-    let type, token
-    while (([[type, token]] = template, type === TemplateChunkType.Text && isNoToken(token))) {
+    while (isNoToken(template)) {
         template.shift()
     }
 }
