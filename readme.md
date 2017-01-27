@@ -65,36 +65,36 @@ Following table represents timings of execution with different number of these e
 Caching relates to caching parsed expressions passed to `when` as tagged template string.
 
 ### run 100000 times
-|cached|method|time|
+|cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|240.19 µs|
-|cached|average|2.188 µs|
-|cached|median|1.872 µs|
+|uncached|(first run)|267.67 µs|
+|cached|average|2.227 µs|
+|cached|median|1.951 µs|
 
 ### run 10000 times
-|cached|method|time|
+|cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|79.567 µs|
-|cached|average|2.129 µs|
-|cached|median|1.857 µs|
+|uncached|(first run)|145.383 µs|
+|cached|average|2.265 µs|
+|cached|median|1.986 µs|
 
 ### run 1000 times
-|cached|method|time|
+|cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|167.342 µs|
-|cached|average|3.201 µs|
-|cached|median|2.468 µs|
+|uncached|(first run)|181.714 µs|
+|cached|average|3.194 µs|
+|cached|median|2.407 µs|
 
 ### run 100 times
-|cached|method|time|
+|cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|96.718 µs|
-|cached|average|3.031 µs|
-|cached|median|2.227 µs|
+|uncached|(first run)|62.816 µs|
+|cached|average|2.067 µs|
+|cached|median|1.991 µs|
 
 ### run 10 times
-|cached|method|time|
+|cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|222.266 µs|
-|cached|average|4.056 µs|
-|cached|median|3.718 µs|
+|uncached|(first run)|68.746 µs|
+|cached|average|2.642 µs|
+|cached|median|2.441 µs|

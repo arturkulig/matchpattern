@@ -8,18 +8,21 @@ function matches() {
         when`1`(noop),
         when`_`(noop)
     ])
-    match({ a: { b: { c: 42 } } }, [
+    match({ a: { b: { c: 42 }, d: 12 } }, [
         when`1`(noop),
-        when`{a: [42, 24]}`(noop),
-        when`{a: {b: {c: discovery}}}`(noop),
+        when`{a: [42, 24], ...}`(noop),
+        when`{a: {b: {c: discovery}, d: _}}`(noop),
         when`_`(noop)
     ])
     match([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], [
+        when`[${{}}]`(noop),
         when`[1, "2", 3, {a: ${Math.random()}}, _, 6, 7, 8, 9]`(noop),
         when`_`(noop)
     ])
 }
-// force to optimize
+// force into optimizing
+// so all tests are run
+// in the same environment
 for (let i = 0; i < 1e5; i++) matches()
 
 function test() {
@@ -39,25 +42,10 @@ function test() {
     const min = times.reduce((min, time) => Math.min(min, time), Number.MAX_VALUE)
     const timesSorted = times.concat([]).sort((a, b) => Math.sign(a - b))
     const formatTime = v => `${Math.round(nanoToMili(v) * 1e3) / 1e3} µs`
-    function summarize(label, times) {
-        console.log('')
-        console.log(label)
-        const resolution = 10
-        console.log(`0/${resolution} ${formatTime(times[0])}\t${Math.round(100 * times[0] / min)}%`)
-        for (let i = 1; i < resolution; i++)
-            console.log(`${i}/${resolution} ${
-                formatTime(times[Math.ceil(times.length / resolution * i)])
-                }\t${
-                Math.round(100 * times[Math.ceil(times.length / resolution * i)] / min)
-                }%`)
-        console.log(`${resolution}/${resolution} ${formatTime(times[times.length - 1])}\t${Math.round(100 * times[times.length - 1] / min)}%`)
-    }
-    // summarize('timed', times)
-    // summarize('sorted', timesSorted)
 
     console.log('')
     console.log('### run', repeat, 'times')
-    console.log('|cached|method|time|')
+    console.log('|cached|method|execution time of a match case|')
     console.log('|---|---|---|')
     const uncached = times[0]
     const cached = times.slice(1).reduce((sum, time) => sum + time) / (times.length - 1)

@@ -38,6 +38,7 @@ export const cache: [TemplateStringsArray, PathMatcher[]][] = []
 export function getCachedMatcher(template: TemplateStringsArray): PathMatcher[] {
     cacheLoop:
     for (let cacheIdx = 0; cacheIdx < cache.length; cacheIdx++) {
+        if (cache[cacheIdx][0].length !== template.length) continue cacheLoop
         for (let partIdx = 0; partIdx < Math.max(cache[cacheIdx].length, cache[cacheIdx][0].length); partIdx++) {
             if (cache[cacheIdx][0][partIdx] !== template[partIdx]) continue cacheLoop
         }
@@ -57,7 +58,7 @@ export function getTemplateMatcher(template: TemplateStringsArray): PathMatcher[
 export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     const [[type, token]] = template
     switch (true) {
-        case (isTokenOfRef(template)): {
+        case (template[0][0] === TemplateChunkType.Ref): {
             getRefMatchers(template, matchers, currentPath)
             return
         }
@@ -66,27 +67,27 @@ export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], c
             getMatcher(template, matchers, currentPath)
             return
         }
-        case (isTokenOfString(template)): {
+        case (template[0][0] === TemplateChunkType.String): {
             getStringMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfNumber(template)): {
+        case (template[0][0] === TemplateChunkType.Number): {
             getNumberMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfObject(template)): {
+        case (template[0][0] === TemplateChunkType.ObjectStart): {
             getObjectMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfArray(template)): {
+        case (template[0][0] === TemplateChunkType.ArrayStart): {
             getArrayMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfAny(template)): {
+        case (template[0][0] === TemplateChunkType.Blank): {
             getAnyMatchers(template, matchers, currentPath)
             return
         }
-        case (isTokenOfOutput(template)): {
+        case (template[0][0] === TemplateChunkType.Symbol): {
             getOutputMatchers(template, matchers, currentPath)
             return
         }
@@ -123,10 +124,6 @@ function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 
     while (true) {
         suckSpaces(template)
-
-        if (isTokenOfRef(template)) {
-            throw new Error()
-        }
 
         if (template[0][0] === TemplateChunkType.ObjectEnd) {
             matchers.push([
@@ -266,36 +263,8 @@ function isTokenOfFold(template: TemplateChunk[]) {
     return template[0][0] === TemplateChunkType.Fold
 }
 
-function isTokenOfAny(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.Blank
-}
-
-function isTokenOfObject(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.ObjectStart
-}
-
-function isTokenOfArray(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.ArrayStart
-}
-
-function isTokenOfString(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.String
-}
-
-function isTokenOfNumber(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.Number
-}
-
 function isNoToken(template: TemplateChunk[]) {
     return template[0][0] === TemplateChunkType.Space
-}
-
-function isTokenOfOutput(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.Symbol
-}
-
-function isTokenOfRef(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.Ref
 }
 
 function suckSpaces(template: TemplateChunk[]) {
