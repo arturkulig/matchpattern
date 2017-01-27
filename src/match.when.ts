@@ -1,4 +1,5 @@
 import { compare } from './compare'
+export { cache } from './compare'
 
 export type FunctionResult<T> = (output: { [id: string]: any }) => T
 export type Result<T> = T | FunctionResult<T>

@@ -58,3 +58,43 @@ Once it's out of WIP state, it will be published on npm.
 ```
 npm install github:arturkulig/match-pattern
 ```
+
+## Performance
+
+Following table represents timings of execution with different number of these executions following another immediately.
+Caching relates to caching parsed expressions passed to `when` as tagged template string.
+
+### run 100000 times
+|cached|method|time|
+|---|---|---|
+|uncached|(first run)|240.19 µs|
+|cached|average|2.188 µs|
+|cached|median|1.872 µs|
+
+### run 10000 times
+|cached|method|time|
+|---|---|---|
+|uncached|(first run)|79.567 µs|
+|cached|average|2.129 µs|
+|cached|median|1.857 µs|
+
+### run 1000 times
+|cached|method|time|
+|---|---|---|
+|uncached|(first run)|167.342 µs|
+|cached|average|3.201 µs|
+|cached|median|2.468 µs|
+
+### run 100 times
+|cached|method|time|
+|---|---|---|
+|uncached|(first run)|96.718 µs|
+|cached|average|3.031 µs|
+|cached|median|2.227 µs|
+
+### run 10 times
+|cached|method|time|
+|---|---|---|
+|uncached|(first run)|222.266 µs|
+|cached|average|4.056 µs|
+|cached|median|3.718 µs|

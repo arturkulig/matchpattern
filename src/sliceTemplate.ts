@@ -79,7 +79,7 @@ const tokenMatchers: [TemplateChunkType, RegExp | FuncTokenMatcher][] = [
 ]
 
 export function sliceTemplate(templates: TemplateStringsArray) {
-    let chunks = []
+    const chunks = []
     for (let i = 0; i < templates.length; i++) {
         if (i > 0) {
             chunks.push([TemplateChunkType.Ref, i - 1])
