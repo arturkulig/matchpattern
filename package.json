@@ -48,8 +48,5 @@
     "transform": {
       ".*\\.tsx?$": "<rootDir>/jest-ts-preprocessor.js"
     }
-  },
-  "dependencies": {
-    "lodash.isequal": "^4.5.0"
   }
 }
