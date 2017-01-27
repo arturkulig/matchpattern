@@ -1,11 +1,11 @@
-# match-pattern
+# matchpattern
 
-`match-pattern` is a library enabling performing pattern matching.
+`matchpattern` is a library enabling performing pattern matching.
 
 ## Example
 
 ```JavaScript
-import { match, when } from 'match-pattern'
+import { match, when } from 'matchpattern'
 
 const response = { status: 200, body: 'hello world' }
 
