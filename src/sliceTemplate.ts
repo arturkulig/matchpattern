@@ -1,29 +1,108 @@
 export enum TemplateChunkType {
-    Text,
+    Symbol,
+    Space,
+    String,
+    Number,
+    ObjectStart,
+    ObjectEnd,
+    ArrayStart,
+    ArrayEnd,
+    Fold,
+    Blank,
     Ref,
 }
-
-export type TemplateTextChunk = [TemplateChunkType.Text, string]
+export type TemplateTextChunk = [
+    TemplateChunkType.Space |
+    TemplateChunkType.ObjectStart |
+    TemplateChunkType.ObjectEnd |
+    TemplateChunkType.ArrayStart |
+    TemplateChunkType.ArrayEnd |
+    TemplateChunkType.Blank |
+    TemplateChunkType.String |
+    TemplateChunkType.String |
+    TemplateChunkType.Number |
+    TemplateChunkType.Fold |
+    TemplateChunkType.Symbol,
+    string
+]
 export type TemplateRefChunk = [TemplateChunkType.Ref, number]
 export type TemplateChunk =
-    TemplateTextChunk |
-    TemplateRefChunk
+    TemplateRefChunk |
+    TemplateTextChunk
+type FuncTokenMatcher = (tmpl: string) => string[]
 
-export function sliceTemplate(s: TemplateStringsArray) {
-    let chunks = []
-    let refCount = 0
-    for (let i = 0; i < s.length; i++) {
-        if (i > 0) {
-            chunks.push([TemplateChunkType.Ref, refCount++])
+function matchSpaceToken(template: string) {
+    let i = 0
+    for (; i < template.length; i++) {
+        if (template[i] !== ' ') {
+            break
         }
-        tokenize(s[i])
-            .forEach(
-            part => chunks.push([TemplateChunkType.Text, part] as TemplateChunk)
-            )
     }
-    return chunks
+    if (i === 0) {
+        return null
+    }
+    return [template, template.substring(0, i), template.substring(i)]
 }
 
-function tokenize(s: string) {
-    return (s.match(/([a-z0-9$_ ]+|[^a-z0-9$_ ]{1})/gi) || [])
+function matchStringToken(template: string) {
+    if (template[0] === '"' || template[0] === '\'') {
+        const quote = template[0]
+        for (let i = 1; ; i++) {
+            if (template[i] === quote && template[i - 1] !== '\\') {
+                return [template, template.substring(0, i + 1), template.substring(i + 1)]
+            }
+        }
+    }
+    return null
+}
+
+function matchSomeSpecificChar(char: string) {
+    return (template: string) => {
+        if (template[0] === char) {
+            return [template, template[0], template.substring(1)]
+        }
+        return null
+    }
+}
+
+const tokenMatchers: [TemplateChunkType, RegExp | FuncTokenMatcher][] = [
+    [TemplateChunkType.Space, matchSpaceToken],
+    [TemplateChunkType.ObjectStart, matchSomeSpecificChar('{')],
+    [TemplateChunkType.ObjectEnd, matchSomeSpecificChar('}')],
+    [TemplateChunkType.ArrayStart, matchSomeSpecificChar('[')],
+    [TemplateChunkType.ArrayEnd, matchSomeSpecificChar(']')],
+    [TemplateChunkType.Blank, matchSomeSpecificChar('_')],
+    [TemplateChunkType.String, matchStringToken],
+    [TemplateChunkType.Number, /^(-?[0-9]+(?:\.[0-9]+)?)(.*)$/],
+    [TemplateChunkType.Fold, /^(\.\.\.[a-zA-Z0-9]*)(.*)$/],
+    [TemplateChunkType.Symbol, /^([a-zA-Z0-9]+|[^ ])(.*)$/],
+]
+
+export function sliceTemplate(templates: TemplateStringsArray) {
+    let chunks = []
+    for (let i = 0; i < templates.length; i++) {
+        if (i > 0) {
+            chunks.push([TemplateChunkType.Ref, i - 1])
+        }
+        let template = templates[i]
+        while (template.length > 0) {
+            for (let tMIdx = 0; tMIdx < tokenMatchers.length; tMIdx++) {
+                const matcher = tokenMatchers[tMIdx][1]
+                let match
+                if (typeof matcher === 'function') {
+                    match = matcher(template)
+                } else if (matcher instanceof RegExp) {
+                    match = matcher.exec(template)
+                } else {
+                    throw new Error()
+                }
+                if (match === null) continue
+                const [, token, rest] = match
+                chunks.push([tokenMatchers[tMIdx][0], token])
+                template = rest
+                break
+            }
+        }
+    }
+    return chunks
 }

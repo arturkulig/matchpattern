@@ -1,5 +1,4 @@
-import { sliceTemplate, TemplateChunkType } from './sliceTemplate'
-const {Text, Ref} = TemplateChunkType
+import { sliceTemplate, TemplateChunkType as T } from './sliceTemplate'
 
 describe('TemplateReader', () => {
     function getTemplateReader(s: TemplateStringsArray, ...args: any[]) {
@@ -9,55 +8,77 @@ describe('TemplateReader', () => {
     it('slices continous string', () => {
         const chunks = getTemplateReader`{abc: 1 }`
         expect(chunks).toEqual([
-            [Text, '{'],
-            [Text, 'abc'],
-            [Text, ':'],
-            [Text, ' 1 '],
-            [Text, '}'],
+            [T.ObjectStart, '{'],
+            [T.Symbol, 'abc'],
+            [T.Symbol, ':'],
+            [T.Space, ' '],
+            [T.Number, '1'],
+            [T.Space, ' '],
+            [T.ObjectEnd, '}'],
         ])
     })
 
     it('slices string with expressions', () => {
         const chunks = getTemplateReader`{abc: ${1} ${2}}`
         expect(chunks).toEqual([
-            [Text, '{'],
-            [Text, 'abc'],
-            [Text, ':'],
-            [Text, ' '],
-            [Ref, 0],
-            [Text, ' '],
-            [Ref, 1],
-            [Text, '}'],
+            [T.ObjectStart, '{'],
+            [T.Symbol, 'abc'],
+            [T.Symbol, ':'],
+            [T.Space, ' '],
+            [T.Ref, 0],
+            [T.Space, ' '],
+            [T.Ref, 1],
+            [T.ObjectEnd, '}'],
         ])
     })
 
     it('slices string with strings', () => {
-        const chunks = getTemplateReader`{abc: "ba \\".a."}`
-        expect(chunks).toEqual([
-            [Text, '{'],
-            [Text, 'abc'],
-            [Text, ':'],
-            [Text, ' '],
-            [Text, '"'],
-            [Text, 'ba '],
-            [Text, '\\'],
-            [Text, '"'],
-            [Text, '.'],
-            [Text, 'a'],
-            [Text, '.'],
-            [Text, '"'],
-            [Text, '}'],
+        expect(getTemplateReader`{abc: "ba \\".a."}`).toEqual([
+            [T.ObjectStart, '{'],
+            [T.Symbol, 'abc'],
+            [T.Symbol, ':'],
+            [T.Space, ' '],
+            [T.String, '"ba \\".a."'],
+            [T.ObjectEnd, '}'],
+        ])
+        expect(getTemplateReader`{abc: 'ba \\'.a.'}`).toEqual([
+            [T.ObjectStart, '{'],
+            [T.Symbol, 'abc'],
+            [T.Symbol, ':'],
+            [T.Space, ' '],
+            [T.String, '\'ba \\\'.a.\''],
+            [T.ObjectEnd, '}'],
         ])
     })
 
-    it('slices string with number', () => {
-        const chunks = getTemplateReader`{abc: 1 }`
+    it('slices string with a number', () => {
+        const chunks = getTemplateReader`{abc: 1, ... }`
         expect(chunks).toEqual([
-            [Text, '{'],
-            [Text, 'abc'],
-            [Text, ':'],
-            [Text, ' 1 '],
-            [Text, '}'],
+            [T.ObjectStart, '{'],
+            [T.Symbol, 'abc'],
+            [T.Symbol, ':'],
+            [T.Space, ' '],
+            [T.Number, '1'],
+            [T.Symbol, ','],
+            [T.Space, ' '],
+            [T.Fold, '...'],
+            [T.Space, ' '],
+            [T.ObjectEnd, '}'],
+        ])
+    })
+
+    it('slices string with a negative number', () => {
+        const chunks = getTemplateReader`{abc: -1, ...auto}`
+        expect(chunks).toEqual([
+            [T.ObjectStart, '{'],
+            [T.Symbol, 'abc'],
+            [T.Symbol, ':'],
+            [T.Space, ' '],
+            [T.Number, '-1'],
+            [T.Symbol, ','],
+            [T.Space, ' '],
+            [T.Fold, '...auto'],
+            [T.ObjectEnd, '}'],
         ])
     })
 })

@@ -48,9 +48,9 @@ match(valueToMatch, [
 |`{a: 1}`|object|Matches an object with exact keys as in pattern and matching values|
 |`[1]`|array|Matches an array with exactly same value and therefore - length|
 |`_`|any value|Matches everything. Useful when matching objects and arrays.|
-|`[a-zA-Z0-9_]`|output|Match any value and export using provided name to condition handler|
+|`[a-zA-Z0-9]`|output|Match any value and export using provided name to condition handler|
 |`...`|fold|Matches any remaining values in object and arrays|
-|`...[a-zA-Z0-9_]`|named fold|Matches any remaining values in object and arrays, then exports these to condition handler|
+|`...[a-zA-Z0-9]`|named fold|Matches any remaining values in object and arrays, then exports these to condition handler|
 
 ## Installation
 

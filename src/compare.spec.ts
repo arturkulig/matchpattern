@@ -4,13 +4,22 @@ function match(s: TemplateStringsArray, ...args: any[]) {
     return (value) => compare(value, s, args)
 }
 
-describe('match', () => {
+describe('compare', () => {
     it('can match strings', () => {
         expect(match`'abc'`('abc')).not.toBe(null)
         expect(match`"abc"`('abc')).not.toBe(null)
         expect(match`"a'bc"`('a\'bc')).not.toBe(null)
         expect(match`"a'bc"`(0)).toBe(null)
         expect(match`"a'bc"`({ a: 1 })).toBe(null)
+    })
+
+    it('can match number', () => {
+        expect(match`1`(1)).not.toBe(null)
+        expect(match`123`(123)).not.toBe(null)
+        expect(match`1`(2)).toBe(null)
+        expect(match`-1`(-1)).not.toBe(null)
+        expect(match`3.141592653589793`(3.141592653589793)).not.toBe(null)
+        expect(match`-3.141592653589793`(-3.141592653589793)).not.toBe(null)
     })
 
     describe('can match objects', () => {
@@ -25,10 +34,6 @@ describe('match', () => {
         it('with numbers', () => {
             expect(match`{a: 42}`({ a: 42 })).not.toBe(null)
         })
-        it('with arrays', () => {
-            expect(match`{a: ['b']}`({ a: ['b'] })).not.toBe(null)
-            expect(match`{a: ['c']}`({ a: ['b'] })).toBe(null)
-        })
         it('nested', () => {
             expect(match`{a: {b : 'c'}}`({ a: { b: 'c' } })).not.toBe(null)
             expect(match`{a: {b : 'c'}}`({ a: 'a' })).toBe(null)
@@ -38,6 +43,10 @@ describe('match', () => {
             expect(match`{a : 1, b: 2, ...others}`({ a: 1, b: 2, c: 3 })).toEqual({ others: { c: 3 } })
             expect(match`{a : 1, b: 2, ...}`({ a: 1 })).toBe(null)
             expect(match`{a : 1, b: 2, ...}`({ b: 2 })).toBe(null)
+        })
+        it('with arrays', () => {
+            expect(match`{a: ['b']}`({ a: ['b'] })).not.toBe(null)
+            expect(match`{a: ['c']}`({ a: ['b'] })).toBe(null)
         })
     })
 
