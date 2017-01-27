@@ -56,7 +56,7 @@ match(valueToMatch, [
 
 Once it's out of WIP state, it will be published on npm.
 ```
-npm install github:arturkulig/match-pattern
+npm install --save matchpattern
 ```
 
 ## Performance
