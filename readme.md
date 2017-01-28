@@ -28,16 +28,88 @@ const result = match(response, [
 console.log(result) // 'hello world'
 ```
 
+...also factorial function can be implemented with `matchpattern`...
+
+```JavaScript
+function fact(n) {
+  return match(n, [
+    when `0` (1),
+    when `_` (() => n * fact(n-1))
+  ]);
+}
+```
+
+...although it is probably not the best idea as it is much slower than regular solution.
+**It is definitely a tool to speed up developement and improve readability of code, rather than execution time.**
+
 ## Usage
 
+Matching simple strings and numbers can be done, but simple cases `switch` statement will be a better choice.
+
+### match objects
+
+```JavaScript
+console.log(
+    match(someObject, [
+
+        // print whats at someObject.a.b.c
+        when `{a:{b:{c: namedValue}}}` (({namedValue}) => namedValue),
+
+        // print someObject object, but leave 'a' property if that matches
+        when `{a: 1, ...namedValue}` (({namedValue}) => namedValue),
+
+        // print true if someObject.a === 1 and b is actually sameOtherObject
+        when `{a: 1, b: ${someOtherObject}}` (true),
+
+    ])
+)
 ```
-match(valueToMatch, [
-    when `condition pattern` (
-        condition handler
-    ),
-    ...
-])
+
+### match arrays
+
+```JavaScript
+console.log(
+    match(someArray, [
+        
+        // print a value pulled from someArray[4][1] when someArray[4][0] === 200
+        // while not checking someArray length
+        when`[_, _, _, _, [200, value], ...]`(({value}) => value)
+
+        // print a tuple with first element and array containing all other values in original order
+        when`[head, ...tail]`(({head, tail}) => [head, tail])
+
+        // print someArray when it is an empty array
+        when`[]`([])
+        
+    ])
+)
 ```
+
+### match references
+
+When you break a template with a inserted value, `matchpattern` will use strict equation to compare these
+
+```JavaScript
+const someObject = {a: 1}
+
+someObject === match([someObject], [
+    when`[${someObject}]`(someObject)
+]) // true
+
+```
+
+Although as rules are applied from top to bottom, similarity will win over reference as reference will never be checked if such rule is lower than one that is satisfied.
+
+```JavaScript
+const someObject = {a: 1}
+
+someObject === match([someObject], [
+    when`[{a: 1}]`('oops!')
+    when`[${someObject}]`(someObject)
+]) // false
+
+```
+
 
 ## Patterns
 
