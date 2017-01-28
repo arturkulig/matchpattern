@@ -139,34 +139,34 @@ Caching relates to caching parsed expressions passed to `when` as tagged templat
 ### run 100000 times
 |cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|267.67 µs|
-|cached|average|2.227 µs|
-|cached|median|1.951 µs|
+|uncached|(first run)|206.489 µs|
+|cached|average|2.141 µs|
+|cached|median|1.923 µs|
 
 ### run 10000 times
 |cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|145.383 µs|
-|cached|average|2.265 µs|
-|cached|median|1.986 µs|
+|uncached|(first run)|147.627 µs|
+|cached|average|2.274 µs|
+|cached|median|2.092 µs|
 
 ### run 1000 times
 |cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|181.714 µs|
-|cached|average|3.194 µs|
-|cached|median|2.407 µs|
+|uncached|(first run)|174.146 µs|
+|cached|average|3 µs|
+|cached|median|2.319 µs|
 
 ### run 100 times
 |cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|62.816 µs|
-|cached|average|2.067 µs|
-|cached|median|1.991 µs|
+|uncached|(first run)|62.234 µs|
+|cached|average|2.826 µs|
+|cached|median|1.98 µs|
 
 ### run 10 times
 |cached|method|execution time of a match case|
 |---|---|---|
-|uncached|(first run)|68.746 µs|
-|cached|average|2.642 µs|
-|cached|median|2.441 µs|
+|uncached|(first run)|105.072 µs|
+|cached|average|4.031 µs|
+|cached|median|3.672 µs|

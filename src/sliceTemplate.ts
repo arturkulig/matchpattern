@@ -34,7 +34,11 @@ type FuncTokenMatcher = (tmpl: string) => string[]
 function matchSpaceToken(template: string) {
     let i = 0
     for (; i < template.length; i++) {
-        if (template[i] !== ' ') {
+        if (
+            template[i] !== ' ' &&
+            template[i] !== '\n' &&
+            template[i] !== '\r'
+        ) {
             break
         }
     }
@@ -73,9 +77,9 @@ const tokenMatchers: [TemplateChunkType, RegExp | FuncTokenMatcher][] = [
     [TemplateChunkType.ArrayEnd, matchSomeSpecificChar(']')],
     [TemplateChunkType.Blank, matchSomeSpecificChar('_')],
     [TemplateChunkType.String, matchStringToken],
-    [TemplateChunkType.Number, /^(-?[0-9]+(?:\.[0-9]+)?)(.*)$/],
-    [TemplateChunkType.Fold, /^(\.\.\.[a-zA-Z0-9]*)(.*)$/],
-    [TemplateChunkType.Symbol, /^([a-zA-Z0-9]+|[^ ])(.*)$/],
+    [TemplateChunkType.Number, /^(-?[0-9]+(?:\.[0-9]+)?)((?:.|\r|\n)*)$/],
+    [TemplateChunkType.Fold, /^(\.\.\.[a-zA-Z0-9]*)((?:.|\r|\n)*)$/],
+    [TemplateChunkType.Symbol, /^([a-zA-Z0-9]+|[^ ])((?:.|\r|\n)*)$/],
 ]
 
 export function sliceTemplate(templates: TemplateStringsArray) {
@@ -84,7 +88,9 @@ export function sliceTemplate(templates: TemplateStringsArray) {
         if (i > 0) {
             chunks.push([TemplateChunkType.Ref, i - 1])
         }
-        let template = templates[i]
+        let template = templates[i]// .replace(/\r/g, ' ').replace(/\n/g, ' ')
+
+        templateLoop:
         while (template.length > 0) {
             for (let tMIdx = 0; tMIdx < tokenMatchers.length; tMIdx++) {
                 const matcher = tokenMatchers[tMIdx][1]
@@ -100,8 +106,9 @@ export function sliceTemplate(templates: TemplateStringsArray) {
                 const [, token, rest] = match
                 chunks.push([tokenMatchers[tMIdx][0], token])
                 template = rest
-                break
+                continue templateLoop
             }
+            throw new Error(`Unrecognized token at ${template}`)
         }
     }
     return chunks

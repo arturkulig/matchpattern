@@ -6,14 +6,17 @@ describe('TemplateReader', () => {
     }
 
     it('slices continous string', () => {
-        const chunks = getTemplateReader`{abc: 1 }`
+        const chunks = getTemplateReader`{
+            abc: 1
+        }`
         expect(chunks).toEqual([
             [T.ObjectStart, '{'],
+            [T.Space, '\n            '],
             [T.Symbol, 'abc'],
             [T.Symbol, ':'],
             [T.Space, ' '],
             [T.Number, '1'],
-            [T.Space, ' '],
+            [T.Space, '\n        '],
             [T.ObjectEnd, '}'],
         ])
     })
