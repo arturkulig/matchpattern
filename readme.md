@@ -126,7 +126,6 @@ someObject === match([someObject], [
 
 ## Installation
 
-Once it's out of WIP state, it will be published on npm.
 ```
 npm install --save matchpattern
 ```
