@@ -25,6 +25,9 @@ function matches() {
 // in the same environment
 for (let i = 0; i < 1e5; i++) matches()
 
+const nanoToMili = v => v / 1e3
+const formatTime = v => `${Math.round(nanoToMili(v) * 1e3) / 1e3} µs`
+
 function test() {
     const repeat = repeats.shift()
     if (!repeat) return
@@ -38,10 +41,8 @@ function test() {
         times.push((sec * 1e9 + nsec) / 3)
     }
 
-    const nanoToMili = v => v / 1e3
     const min = times.reduce((min, time) => Math.min(min, time), Number.MAX_VALUE)
     const timesSorted = times.concat([]).sort((a, b) => Math.sign(a - b))
-    const formatTime = v => `${Math.round(nanoToMili(v) * 1e3) / 1e3} µs`
 
     console.log('')
     console.log('### run', repeat, 'times')
