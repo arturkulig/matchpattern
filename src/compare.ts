@@ -56,6 +56,7 @@ export function getTemplateMatcher(template: TemplateStringsArray): PathMatcher[
 }
 
 export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
+    if (!template.length) return
     const [[type, token]] = template
     switch (true) {
         case (template[0][0] === TemplateChunkType.Ref): {

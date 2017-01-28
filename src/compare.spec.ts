@@ -14,6 +14,7 @@ describe('compare', () => {
     })
 
     it('can match number', () => {
+        expect(match`0`(0)).not.toBe(null)
         expect(match`1`(1)).not.toBe(null)
         expect(match`123`(123)).not.toBe(null)
         expect(match`1`(2)).toBe(null)
