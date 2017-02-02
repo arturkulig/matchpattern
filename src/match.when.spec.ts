@@ -1,4 +1,4 @@
-import { match, when } from './match.when'
+import { match, when, is, isNot } from './match.when'
 
 describe('match when', () => {
     it('throws when no maching case', () => {
@@ -49,5 +49,24 @@ describe('match when', () => {
             when`{ a: { b: { c: everything } } }`(({everything}) => everything),
             when`_`(() => { throw new Error() }),
         ])).toBe(42)
+    })
+    it('is curried', () => {
+        expect(
+            [1, 'foo', 3].map(match([
+                when`'foo'`('bar'),
+                when`n`(({n}) => n * 2)
+            ]))
+        ).toEqual(
+            [2, 'bar', 6]
+            )
+    })
+})
+
+describe('simple checks', () => {
+    it('is', () => {
+        expect([1, 2, 3].filter(is`2`)).toEqual([2])
+    })
+    it('isNot', () => {
+        expect([1, 2, 3].filter(isNot`2`)).toEqual([1, 3])
     })
 })

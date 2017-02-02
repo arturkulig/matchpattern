@@ -31,6 +31,8 @@ console.log(result) // 'hello world'
 ...also factorial function can be implemented with `matchpattern`...
 
 ```JavaScript
+import { match, when } from 'matchpattern'
+
 function fact(n) {
   return match(n, [
     when `0` (1),
@@ -49,6 +51,8 @@ Matching simple strings and numbers can be done, but simple cases `switch` state
 ### match objects
 
 ```JavaScript
+import { match, when } from 'matchpattern'
+
 console.log(
     match(someObject, [
 
@@ -68,9 +72,11 @@ console.log(
 ### match arrays
 
 ```JavaScript
+import { match, when } from 'matchpattern'
+
 console.log(
     match(someArray, [
-        
+         
         // print a value pulled from someArray[4][1] when someArray[4][0] === 200
         // while not checking someArray length
         when`[_, _, _, _, [200, value], ...]`(({value}) => value)
@@ -90,6 +96,8 @@ console.log(
 When you break a template with a inserted value, `matchpattern` will use strict equation to compare these
 
 ```JavaScript
+import { match, when } from 'matchpattern'
+
 const someObject = {a: 1}
 
 someObject === match([someObject], [
@@ -101,6 +109,8 @@ someObject === match([someObject], [
 Although as rules are applied from top to bottom, similarity will win over reference as reference will never be checked if such rule is lower than one that is satisfied.
 
 ```JavaScript
+import { match, when } from 'matchpattern'
+
 const someObject = {a: 1}
 
 someObject === match([someObject], [
@@ -108,6 +118,30 @@ someObject === match([someObject], [
     when`[${someObject}]`(someObject)
 ]) // false
 
+```
+
+### functional
+
+If `match` is passed only matchers, it returns a function that can perform the match, but awaits for input.
+
+```JavaScript
+import { match, when } from 'matchpattern'
+
+[1, 'foo', 3].map(match([
+    when`'foo'`('bar'),
+    when`n`(({n}) => n * 2)
+]))
+```
+
+### simple checks
+
+Two handy functions are at your disposal in case of simpler checks, when there are only two outcomes (true/false).
+
+```JavaScript
+import { is, isNot } from 'matchpattern'
+
+let includeTwo = [1, 2, 3].filter(is`2`) // [2]
+let excludeTwo = [1, 2, 3].filter(isNot`2`) // [1, 3]
 ```
 
 
