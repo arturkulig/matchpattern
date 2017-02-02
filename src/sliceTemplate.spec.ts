@@ -44,12 +44,12 @@ describe('TemplateReader', () => {
             [T.String, '"ba \\".a."'],
             [T.ObjectEnd, '}'],
         ])
-        expect(getTemplateReader`{abc: 'ba \\'.a.'}`).toEqual([
+        expect(getTemplateReader`{abc: 'ba \\\\'}`).toEqual([
             [T.ObjectStart, '{'],
             [T.Symbol, 'abc'],
             [T.Symbol, ':'],
             [T.Space, ' '],
-            [T.String, '\'ba \\\'.a.\''],
+            [T.String, '\'ba \\\\\''],
             [T.ObjectEnd, '}'],
         ])
     })

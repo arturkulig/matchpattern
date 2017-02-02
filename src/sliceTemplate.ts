@@ -52,7 +52,11 @@ function matchStringToken(template: string) {
     if (template[0] === '"' || template[0] === '\'') {
         const quote = template[0]
         for (let i = 1; ; i++) {
-            if (template[i] === quote && template[i - 1] !== '\\') {
+            if (template[i] === '\\') {
+                i++
+                continue
+            }
+            if (template[i] === quote) {
                 return [template, template.substring(0, i + 1), template.substring(i + 1)]
             }
         }
