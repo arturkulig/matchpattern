@@ -92,7 +92,7 @@ export function sliceTemplate(templates: TemplateStringsArray) {
         if (i > 0) {
             chunks.push([TemplateChunkType.Ref, i - 1])
         }
-        let template = templates[i]// .replace(/\r/g, ' ').replace(/\n/g, ' ')
+        let template = templates[i]
 
         templateLoop:
         while (template.length > 0) {
