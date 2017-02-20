@@ -108,4 +108,13 @@ describe('compare', () => {
             expect(match`{a: {b: {c: devil}}}`({ a: { b: { c: 666 } } })).toEqual({ devil: 666 })
         })
     })
+
+    describe('can match null', () => {
+        it('immediately', () => {
+            expect(match`null`(null)).toEqual({})
+        })
+        it('in object', () => {
+            expect(match`{a: {b: {c: null}}}`({ a: { b: { c: null } } })).toEqual({})
+        })
+    })
 })

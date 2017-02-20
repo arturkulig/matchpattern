@@ -154,6 +154,7 @@ let excludeTwo = [1, 2, 3].filter(isNot`2`) // [1, 3]
 |`{a: 1}`|object|Matches an object with exact keys as in pattern and matching values|
 |`[1]`|array|Matches an array with exactly same value and therefore - length|
 |`_`|any value|Matches everything. Useful when matching objects and arrays.|
+|`null`|null|Matches only `null`.|
 |`[a-zA-Z0-9]`|output|Match any value and export using provided name to condition handler|
 |`...`|fold|Matches any remaining values in object and arrays|
 |`...[a-zA-Z0-9]`|named fold|Matches any remaining values in object and arrays, then exports these to condition handler|
@@ -203,3 +204,5 @@ Caching relates to caching parsed expressions passed to `when` as tagged templat
 |uncached|(first run)|105.072 µs|
 |cached|average|4.031 µs|
 |cached|median|3.672 µs|
+
+Measurements got on Mid 2014 MacBook Pro (2,8 GHz Intel Core i5)

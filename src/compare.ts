@@ -59,7 +59,7 @@ export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], c
     if (!template.length) return
     const [[type, token]] = template
     switch (true) {
-        case (template[0][0] === TemplateChunkType.Ref): {
+        case (type === TemplateChunkType.Ref): {
             getRefMatchers(template, matchers, currentPath)
             return
         }
@@ -68,32 +68,44 @@ export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], c
             getMatcher(template, matchers, currentPath)
             return
         }
-        case (template[0][0] === TemplateChunkType.String): {
+        case (type === TemplateChunkType.String): {
             getStringMatchers(template, matchers, currentPath)
             return
         }
-        case (template[0][0] === TemplateChunkType.Number): {
+        case (type === TemplateChunkType.Number): {
             getNumberMatchers(template, matchers, currentPath)
             return
         }
-        case (template[0][0] === TemplateChunkType.ObjectStart): {
+        case (type === TemplateChunkType.ObjectStart): {
             getObjectMatchers(template, matchers, currentPath)
             return
         }
-        case (template[0][0] === TemplateChunkType.ArrayStart): {
+        case (type === TemplateChunkType.ArrayStart): {
             getArrayMatchers(template, matchers, currentPath)
             return
         }
-        case (template[0][0] === TemplateChunkType.Blank): {
+        case (type === TemplateChunkType.Blank): {
             getAnyMatchers(template, matchers, currentPath)
             return
         }
-        case (template[0][0] === TemplateChunkType.Symbol): {
+        case (type === TemplateChunkType.Symbol && token === 'null'): {
+            getNullMatchers(template, matchers, currentPath)
+            return
+        }
+        case (type === TemplateChunkType.Symbol): {
             getOutputMatchers(template, matchers, currentPath)
             return
         }
     }
     throw new Error('token unmatched: ' + token)
+}
+
+function getNullMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
+    template.shift()
+    matchers.push([
+        currentPath,
+        (value) => (value === null)
+    ])
 }
 
 function getOutputMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
