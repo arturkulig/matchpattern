@@ -35,10 +35,12 @@ export function match<T>(...args: any[]) {
 
 const jsonCache = {}
 const emptyMatcherResult = [null, null]
-export function when<T>(template: TemplateStringsArray, ...refs: any[]): WhenResult<T> {
-    return (result: Result<T>) => value => {
-        const output = compare(value, template, refs)
-        if (output === null) return (emptyMatcherResult as MatcherResult<T>)
-        return [output, result] as MatcherResult<T>
+export function when(template: TemplateStringsArray, ...refs: any[]) {
+    return function whenMatched<T>(result: Result<T>) {
+        return function whenMatchedReturn(value) {
+            const output = compare(value, template, refs)
+            if (output === null) return (emptyMatcherResult as MatcherResult<T>)
+            return [output, result] as MatcherResult<T>
+        }
     }
 }

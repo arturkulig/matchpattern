@@ -1,5 +1,17 @@
 import { match, when, is, isNot } from './match.when'
 
+function typescheck1() {
+    interface SI {
+        x: number,
+        y: number
+    }
+
+    match<SI>({}, [
+        when``(() => ({ x: 1, y: 1 })),
+        when``(() => ({ x: 2, y: 1 }))
+    ])
+}
+
 describe('match when', () => {
     it('throws when no maching case', () => {
         expect(() => {
@@ -52,7 +64,7 @@ describe('match when', () => {
     })
     it('is curried', () => {
         expect(
-            [1, 'foo', 3].map(match([
+            [1, 'foo', 3].map(match<string | number>([
                 when`'foo'`('bar'),
                 when`n`(({n}) => n * 2)
             ]))
