@@ -135,7 +135,8 @@ import { match, when } from 'matchpattern'
 
 ### simple checks
 
-Two handy functions are at your disposal in case of simpler checks, when there are only two outcomes (true/false).
+Two handy functions are at your disposal in case of simpler checks,
+when there are only two outcomes (true/false).
 
 ```JavaScript
 import { is, isNot } from 'matchpattern'
@@ -144,6 +145,27 @@ let includeTwo = [1, 2, 3].filter(is`2`) // [2]
 let excludeTwo = [1, 2, 3].filter(isNot`2`) // [1, 3]
 ```
 
+These can also be used with plain `switch` statement like this:
+
+```
+switch (true) {
+    case is`0`(num): {
+        // do sth special for 0
+        break
+    }
+    case is`1`(num): {
+        // do sth special for 1
+        break
+    }
+    case (typeof num === number) {
+        // do sth for other numbers
+        break
+    }
+    default: {
+        throw new Error('NaN')
+    }
+}
+```
 
 ## Patterns
 
