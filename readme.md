@@ -28,6 +28,8 @@ const result = match(response, [
 console.log(result) // 'hello world'
 ```
 
+> run this live on https://runkit.com/arturkulig/591af15f6f769e0011ed7910
+
 ...also factorial function can be implemented with `matchpattern`...
 
 ```JavaScript
