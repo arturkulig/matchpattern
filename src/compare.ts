@@ -57,15 +57,11 @@ export function getTemplateMatcher(template: TemplateStringsArray): PathMatcher[
 
 export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     if (!template.length) return
+    suckSpaces(template)
     const [[type, token]] = template
     switch (true) {
         case (type === TemplateChunkType.Ref): {
             getRefMatchers(template, matchers, currentPath)
-            return
-        }
-        case (isNoToken(template)): {
-            template.shift()
-            getMatcher(template, matchers, currentPath)
             return
         }
         case (type === TemplateChunkType.String): {
@@ -94,6 +90,10 @@ export function getMatcher(template: TemplateChunk[], matchers: PathMatcher[], c
         }
         case (type === TemplateChunkType.Symbol): {
             getOutputMatchers(template, matchers, currentPath)
+            return
+        }
+        case (type === TemplateChunkType.ClassStart): {
+            getInstanceMatchers(template, matchers, currentPath)
             return
         }
     }
@@ -129,6 +129,39 @@ function getRefMatchers(template: TemplateChunk[], matchers: PathMatcher[], curr
     ])
 }
 
+function getInstanceMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
+    template.shift() // pop percentage symbol
+    const classChunk = template.shift()
+    switch (classChunk[0]) {
+        case TemplateChunkType.Ref: {
+            const [, refIdx] = classChunk as TemplateRefChunk
+            matchers.push([
+                currentPath,
+                (value, refs) => (
+                    (value instanceof refs[refIdx]) ||
+                    (Object.getPrototypeOf(value).constructor === refs[refIdx])
+                )
+            ])
+            break
+        }
+        case TemplateChunkType.Symbol: {
+            const [, className] = classChunk as TemplateTextChunk
+            matchers.push([
+                currentPath,
+                (value) => (Object.getPrototypeOf(value).constructor.name === className)
+            ])
+            break
+        }
+        default: {
+            throw new Error('Incorrect class token')
+        }
+    }
+    suckSpaces(template)
+    try {
+        getMatcher(template, matchers, currentPath)
+    } catch (e) { }
+}
+
 function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], currentPath: Path) {
     template.shift() // pop bracket
 
@@ -138,7 +171,7 @@ function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
     while (true) {
         suckSpaces(template)
 
-        if (template[0][0] === TemplateChunkType.ObjectEnd) {
+        if (head(head(template)) === TemplateChunkType.ObjectEnd) {
             matchers.push([
                 currentPath,
                 (value) => (
@@ -150,7 +183,7 @@ function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
             return
         }
 
-        if (template[0][0] === TemplateChunkType.Symbol && template[0][1] === ',') {
+        if (head(head(template)) === TemplateChunkType.Symbol && template[0][1] === ',') {
             template.shift()
             suckSpaces(template)
 
@@ -187,11 +220,13 @@ function getObjectMatchers(template: TemplateChunk[], matchers: PathMatcher[], c
 
         suckSpaces(template)
         const colon = template.shift()
-        if (colon[1] !== ':') throw new Error()
+        if (colon[1] !== ':') throw new Error('Expected colon after a property name\n' + colon[1])
 
         if (keyChunk[0] !== TemplateChunkType.Symbol) throw new Error()
         const key = (keyChunk[1] as string).trim()
-        keys.push(key)
+        if (keys.indexOf(key) < 0) {
+            keys.push(key)
+        }
 
         const innerPath = currentPath.concat()
         innerPath.push(key)
@@ -208,7 +243,7 @@ function getArrayMatchers(template: TemplateChunk[], matchers: PathMatcher[], cu
     while (true) {
         suckSpaces(template)
 
-        if (template[0][0] === TemplateChunkType.ArrayEnd) {
+        if (head(head(template)) === TemplateChunkType.ArrayEnd) {
             matchers.push([
                 currentPath,
                 (value) => value.length === length
@@ -273,11 +308,16 @@ function getAnyMatchers(template: TemplateChunk[], matchers: PathMatcher[], curr
 }
 
 function isTokenOfFold(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.Fold
+    return head(head(template)) === TemplateChunkType.Fold
 }
 
 function isNoToken(template: TemplateChunk[]) {
-    return template[0][0] === TemplateChunkType.Space
+    return head(head(template)) === TemplateChunkType.Space
+}
+
+function head<T>(arr: T[]): T {
+    if (!arr) return
+    return arr[0]
 }
 
 function suckSpaces(template: TemplateChunk[]) {

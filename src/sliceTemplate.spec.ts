@@ -84,4 +84,51 @@ describe('TemplateReader', () => {
             [T.ObjectEnd, '}'],
         ])
     })
+
+    it('slices with a class instance as string', () => {
+        expect(getTemplateReader`{ instance: %Klass{ a: 1 } }`)
+            .toEqual([
+                [T.ObjectStart, '{'],
+                [T.Space, ' '],
+                [T.Symbol, 'instance'],
+                [T.Symbol, ':'],
+                [T.Space, ' '],
+                [T.ClassStart, '%'],
+                [T.Symbol, 'Klass'],
+                [T.ObjectStart, '{'],
+                [T.Space, ' '],
+                [T.Symbol, 'a'],
+                [T.Symbol, ':'],
+                [T.Space, ' '],
+                [T.Number, '1'],
+                [T.Space, ' '],
+                [T.ObjectEnd, '}'],
+                [T.Space, ' '],
+                [T.ObjectEnd, '}'],
+            ])
+    })
+
+    it('slices with a class instance as reference', () => {
+        class SomeClass { }
+        expect(getTemplateReader`{ instance: %${SomeClass}{ a: 1 } }`)
+            .toEqual([
+                [T.ObjectStart, '{'],
+                [T.Space, ' '],
+                [T.Symbol, 'instance'],
+                [T.Symbol, ':'],
+                [T.Space, ' '],
+                [T.ClassStart, '%'],
+                [T.Ref, 0],
+                [T.ObjectStart, '{'],
+                [T.Space, ' '],
+                [T.Symbol, 'a'],
+                [T.Symbol, ':'],
+                [T.Space, ' '],
+                [T.Number, '1'],
+                [T.Space, ' '],
+                [T.ObjectEnd, '}'],
+                [T.Space, ' '],
+                [T.ObjectEnd, '}'],
+            ])
+    })
 })

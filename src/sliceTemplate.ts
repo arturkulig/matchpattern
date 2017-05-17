@@ -3,6 +3,7 @@ export enum TemplateChunkType {
     Space,
     String,
     Number,
+    ClassStart,
     ObjectStart,
     ObjectEnd,
     ArrayStart,
@@ -13,6 +14,7 @@ export enum TemplateChunkType {
 }
 export type TemplateTextChunk = [
     TemplateChunkType.Space |
+    TemplateChunkType.ClassStart |
     TemplateChunkType.ObjectStart |
     TemplateChunkType.ObjectEnd |
     TemplateChunkType.ArrayStart |
@@ -26,9 +28,7 @@ export type TemplateTextChunk = [
     string
 ]
 export type TemplateRefChunk = [TemplateChunkType.Ref, number]
-export type TemplateChunk =
-    TemplateRefChunk |
-    TemplateTextChunk
+export type TemplateChunk = [TemplateChunkType, string | number]
 type FuncTokenMatcher = (tmpl: string) => string[]
 
 function matchSpaceToken(template: string) {
@@ -81,6 +81,7 @@ const tokenMatchers: [TemplateChunkType, RegExp | FuncTokenMatcher][] = [
     [TemplateChunkType.ArrayEnd, matchSomeSpecificChar(']')],
     [TemplateChunkType.Blank, matchSomeSpecificChar('_')],
     [TemplateChunkType.String, matchStringToken],
+    [TemplateChunkType.ClassStart, matchSomeSpecificChar('%')],
     [TemplateChunkType.Number, /^(-?[0-9]+(?:\.[0-9]+)?)((?:.|\r|\n)*)$/],
     [TemplateChunkType.Fold, /^(\.\.\.[a-zA-Z0-9]*)((?:.|\r|\n)*)$/],
     [TemplateChunkType.Symbol, /^([a-zA-Z0-9]+|[^ ])((?:.|\r|\n)*)$/],

@@ -51,6 +51,32 @@ describe('compare', () => {
         })
     })
 
+    describe('can match instance', () => {
+        class SomeClass { aProp = 1 }
+        it('with a name', () => {
+            expect(match`%SomeClass`(new SomeClass)).not.toBe(null)
+            expect(match`%SomeClass{aProp:1}`(new SomeClass)).not.toBe(null)
+            expect(match`[%SomeClass]`([new SomeClass])).not.toBe(null)
+            expect(match`[%SomeClass{aProp:1}]`([new SomeClass])).not.toBe(null)
+            expect(match`[%SomeClass{aProp:1}]`(new SomeClass)).toBe(null)
+        })
+        it('native types', () => {
+            expect(match`%String`('a')).not.toBe(null)
+            expect(match`%${String}`('a')).not.toBe(null)
+            expect(match`%String'a'`('a')).not.toBe(null)
+            expect(match`%${String}'a'`('a')).not.toBe(null)
+            expect(match`%${Object}'a'`('a')).toBe(null)
+            expect(match`%${String}'b'`('a')).toBe(null)
+        })
+        it('with a ref', () => {
+            expect(match`%${SomeClass}`(new SomeClass)).not.toBe(null)
+            expect(match`%${SomeClass}{aProp:1}`(new SomeClass)).not.toBe(null)
+            expect(match`[%${SomeClass}]`([new SomeClass])).not.toBe(null)
+            expect(match`[%${SomeClass}{aProp:1}]`([new SomeClass])).not.toBe(null)
+            expect(match`[%${SomeClass}{aProp:1}]`(new SomeClass)).toBe(null)
+        })
+    })
+
     describe('can match arrays', () => {
         it('with strings', () => {
             expect(match`['a']`(['a'])).not.toBe(null)

@@ -176,6 +176,7 @@ switch (true) {
 |`420`|number|Matches a number|
 |`"yolo"`|string|Matches a string| 
 |`{a: 1}`|object|Matches an object with exact keys as in pattern and matching values|
+|`%Response`|class|Matches a value when is an instance of a class named like token after `%`. Works with reference tokens like `%${Response}`. Can be followed by any complementary pattern as in `%Response{status: 200, ...}`.|
 |`[1]`|array|Matches an array with exactly same value and therefore - length|
 |`_`|any value|Matches everything. Useful when matching objects and arrays.|
 |`null`|null|Matches only `null`.|
